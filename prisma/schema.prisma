@@ -6,3 +6,507 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id                       String              @id @default(uuid())
+  name                     String              @db.Text
+  code                     String?             @db.Text
+  schoolYearId             String?
+  shoolYear                SchoolYear?         @relation(fields: [schoolYearId], references: [id])
+  createSchoolYears        SchoolYear[]        @relation("creator")
+  updateSchoolYears        SchoolYear[]        @relation("updater")
+  createMajors             Major[]             @relation("creator")
+  updateMajors             Major[]             @relation("updater")
+  createClassrooms         Classroom[]         @relation("creator")
+  updateClassrooms         Classroom[]         @relation("updater")
+  createReaderGroups       ReaderGroup[]       @relation("creator")
+  updateReaderGroups       ReaderGroup[]       @relation("updater")
+  createCategories         Category[]          @relation("creator")
+  updateCategories         Category[]          @relation("updater")
+  createAuthors            Author[]            @relation("creator")
+  updateAuthors            Author[]            @relation("updater")
+  createPublishers         Publisher[]         @relation("creator")
+  updatePublishers         Publisher[]         @relation("updater")
+  createRoles              Role[]              @relation("creator")
+  updateRoles              Role[]              @relation("updater")
+  createPermissions        Permission[]        @relation("creator")
+  updatePermissions        Permission[]        @relation("updater")
+  createWarehouses         Warehouse[]         @relation("creator")
+  updateWarehouses         Warehouse[]         @relation("updater")
+  createShelves            Shelve[]            @relation("creator")
+  updateShelves            Shelve[]            @relation("updater")
+  createRacks              Rack[]              @relation("creator")
+  updateRacks              Rack[]              @relation("updater")
+  createDocuments          Document[]          @relation("creator")
+  updateDocuments          Document[]          @relation("updater")
+  roles                    Role[]
+  createDocumentSources    DocumentSource[]    @relation("creator")
+  updateDocumentSources    DocumentSource[]    @relation("updater")
+  createImportTransactions ImportTransaction[] @relation("creator")
+  updateImportTransactions ImportTransaction[] @relation("updater")
+  createExportTransactions ExportTransaction[] @relation("creator")
+  updateExportTransactions ExportTransaction[] @relation("updater")
+  createSuppliers          Supplier[]          @relation("creator")
+  updateSuppliers          Supplier[]          @relation("updater")
+  createWarehouseDocuments WarehouseDocument[] @relation("creator")
+  updateWarehouseDocuments WarehouseDocument[] @relation("updater")
+  createBorrowReceipts     BorrowReceipt[]     @relation("creator")
+  updateBorrowReceipts     BorrowReceipt[]     @relation("updater")
+  borrowReceipts           BorrowReceipt[]     @relation("reader")
+  createBorrowItems        BorrowItem[]        @relation("creator")
+  updateBorrowItems        BorrowItem[]        @relation("updater")
+  createReturnReceipts     ReturnReceipt[]     @relation("creator")
+  updateReturnReceipts     ReturnReceipt[]     @relation("updater")
+  returnReceipts           ReturnReceipt[]     @relation("reader")
+  borrowRequests           BorrowRequest[]     @relation("reader")
+  createBorrowRequests     BorrowRequest[]     @relation("creator")
+  updateBorrowRequests     BorrowRequest[]     @relation("updater")
+  activities               Activity[]
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @db.Text
+  permissions Permission[]
+  users       User[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  creatorId   String
+  updaterId   String?
+  creator     User?        @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater     User?        @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+}
+
+model Permission {
+  id        String   @id @default(uuid())
+  name      String   @db.Text
+  roles     Role[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  creatorId String
+  updaterId String?
+  creator   User?    @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater   User?    @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id        String     @id @default(uuid())
+  name      String     @db.Text
+  desc      String?    @db.Text
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  creatorId String
+  updaterId String?
+  parentId  String?
+  parent    Category?  @relation("parentChild", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Category[] @relation("parentChild")
+  creator   User?      @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater   User?      @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  documents Document[]
+}
+
+model SchoolYear {
+  id         String      @id @default(uuid())
+  name       String
+  desc       String?     @db.Text
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  creatorId  String
+  updaterId  String?
+  creator    User?       @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater    User?       @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  classrooms Classroom[]
+  User       User[]
+}
+
+model Major {
+  id         String      @id @default(uuid())
+  name       String      @db.Text
+  desc       String?     @db.Text
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  creatorId  String
+  updaterId  String?
+  creator    User?       @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater    User?       @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  classrooms Classroom[]
+}
+
+model Classroom {
+  id           String      @id @default(uuid())
+  name         String      @db.Text
+  desc         String?     @db.Text
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  schoolYearId String
+  schoolYear   SchoolYear? @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  majorId      String
+  major        Major?      @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  creatorId    String
+  updaterId    String?
+  creator      User?       @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater      User?       @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+}
+
+model Publisher {
+  id        String     @id @default(uuid())
+  name      String     @db.Text
+  code      String     @db.Text
+  note      String?    @db.Text
+  phone     String?    @db.Text
+  email     String?    @db.Text
+  address   String?    @db.Text
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  creatorId String
+  updaterId String?
+  creator   User?      @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater   User?      @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  documents Document[]
+}
+
+model ReaderGroup {
+  id            String   @id @default(uuid())
+  name          String   @db.Text
+  desc          String?  @db.Text
+  maxTimeBorrow Int?     @default(0)
+  maxDayBorrow  Int?     @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  creatorId     String
+  updaterId     String?
+  creator       User?    @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater       User?    @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+}
+
+model Author {
+  id        String     @id @default(uuid())
+  name      String     @db.Text
+  photoURL  String?    @db.Text
+  desc      String?    @db.Text
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  creatorId String
+  updaterId String?
+  creator   User?      @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater   User?      @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  documents Document[]
+}
+
+model Warehouse {
+  id                 String              @id @default(uuid())
+  name               String              @db.Text
+  position           String?             @db.Text
+  desc               String?             @db.Text
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  creatorId          String
+  updaterId          String?
+  creator            User?               @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater            User?               @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  shelves            Shelve[]
+  importTransactions ImportTransaction[]
+  exportTransactions ExportTransaction[]
+}
+
+model Shelve {
+  id           String     @id @default(uuid())
+  name         String     @db.Text
+  desc         String?    @db.Text
+  warehouserId String
+  warehouser   Warehouse? @relation(fields: [warehouserId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  creatorId    String
+  updaterId    String?
+  creator      User?      @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater      User?      @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  Rack         Rack[]
+}
+
+model Rack {
+  id                 String              @id @default(uuid())
+  name               String              @db.Text
+  desc               String?             @db.Text
+  shelveId           String
+  shelve             Shelve?             @relation(fields: [shelveId], references: [id], onDelete: Cascade)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  creatorId          String
+  updaterId          String?
+  creator            User?               @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater            User?               @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  warehouseDocuments WarehouseDocument[]
+}
+
+model DocumentSource {
+  id        String     @id @default(uuid())
+  name      String     @db.Text
+  desc      String?    @db.Text
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  creatorId String
+  updaterId String?
+  creator   User?      @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater   User?      @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  documents Document[]
+}
+
+model Year {
+  id        String     @id @default(uuid())
+  name      String     @db.Text
+  documents Document[]
+}
+
+model StorageType {
+  id        String     @id @default(uuid())
+  name      String     @db.Text
+  documents Document[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Document {
+  id                 String              @id @default(uuid())
+  code               String              @db.Text
+  name               String              @db.Text
+  otherName          String?             @db.Text
+  language           BOOK_LANGUAGE?
+  storageTypes       StorageType[]
+  authors            Author[]
+  categoryId         String
+  category           Category[]
+  publisherId        String
+  publisher          Publisher?          @relation(fields: [publisherId], references: [id], onDelete: Cascade)
+  documentId         String
+  document           DocumentSource?     @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  translation        String?             @db.Text
+  isbn               String?             @db.Text
+  issn               String?             @db.Text
+  totalPages         Int?
+  coverPrice         Float
+  publishYear        String?
+  publishYearId      Year?               @relation(fields: [publishYear], references: [id])
+  totalVolumes       Int?
+  slug               Int?
+  desc               String?             @db.Text
+  note               String?             @db.Text
+  photoURLs          Json
+  isActive           Boolean             @default(true)
+  bookSeries         String?
+  parentDocumentId   String?
+  parentDocument     Document?           @relation("ParentChild", fields: [parentDocumentId], references: [id], onDelete: Cascade)
+  childDocuments     Document[]          @relation("ParentChild")
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  creatorId          String
+  updaterId          String?
+  creator            User?               @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater            User?               @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  importTransactions ImportTransaction[]
+  exportTransactions ExportTransaction[]
+  warehouseDocuments WarehouseDocument[]
+  borrowItems        BorrowItem[]
+  borrowRequests     BorrowRequest[]
+}
+
+model Supplier {
+  id                 String              @id @default(uuid())
+  name               String              @db.Text
+  phone              String              @db.Text
+  email              String?             @db.Text
+  note               String?             @db.Text
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  creatorId          String
+  updaterId          String?
+  creator            User?               @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater            User?               @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  importTransactions ImportTransaction[]
+}
+
+model ImportTransaction {
+  id          String     @id @default(uuid())
+  code        String     @db.Text
+  name        String     @db.Text
+  importAt    DateTime
+  warehouseId String?
+  warehouse   Warehouse? @relation(fields: [warehouseId], references: [id])
+  supplierId  String?
+  supplier    Supplier?  @relation(fields: [supplierId], references: [id])
+  note        String?    @db.Text
+  documents   Document[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  creatorId   String
+  updaterId   String?
+  creator     User?      @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater     User?      @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+}
+
+model ExportTransaction {
+  id          String           @id @default(uuid())
+  code        String           @db.Text
+  name        String           @db.Text
+  type        TRANSACTION_TYPE
+  exportAt    DateTime
+  warehouseId String?
+  warehouse   Warehouse?       @relation(fields: [warehouseId], references: [id])
+  documents   Document[]
+  note        String?          @db.Text
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  creatorId   String
+  updaterId   String?
+  creator     User?            @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater     User?            @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+}
+
+model WarehouseDocument {
+  id         String          @id @default(uuid())
+  documentId String?
+  document   Document?       @relation(fields: [documentId], references: [id])
+  status     DOCUMENT_STATUS
+  rackId     String?
+  rack       Rack?           @relation(fields: [rackId], references: [id])
+  code       String?         @db.Text
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  creatorId  String
+  updaterId  String?
+  creator    User?           @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater    User?           @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+}
+
+model BorrowItem {
+  id              String         @id @default(uuid())
+  documentId      String?
+  document        Document?      @relation(fields: [documentId], references: [id])
+  borrowAt        DateTime
+  dueAt           DateTime
+  note            String?        @db.Text
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  creatorId       String
+  updaterId       String?
+  creator         User?          @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater         User?          @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+  borrowReceipt   BorrowReceipt? @relation(fields: [borrowReceiptId], references: [id])
+  borrowReceiptId String?
+  returnReceipt   ReturnReceipt? @relation(fields: [returnReceiptId], references: [id])
+  returnReceiptId String?
+}
+
+model BorrowReceipt {
+  id          String       @id @default(uuid())
+  code        String?      @db.Text
+  readerId    String
+  reader      User?        @relation("reader", fields: [readerId], references: [id])
+  content     String?      @db.Text
+  note        String?      @db.Text
+  borrowItems BorrowItem[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  creatorId   String
+  updaterId   String?
+  creator     User?        @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater     User?        @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+}
+
+model ReturnReceipt {
+  id          String       @id @default(uuid())
+  readerId    String
+  reader      User?        @relation("reader", fields: [readerId], references: [id])
+  content     String?      @db.Text
+  borrowItems BorrowItem[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  creatorId   String
+  updaterId   String?
+  creator     User?        @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater     User?        @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+}
+
+model BorrowRequest {
+  id        String                @id @default(uuid())
+  readerId  String
+  reader    User?                 @relation("reader", fields: [readerId], references: [id])
+  note      String?               @db.Text
+  status    BORROW_REQUEST_STATUS
+  documents Document[]
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  creatorId String
+  updaterId String?
+  creator   User?                 @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  updater   User?                 @relation("updater", fields: [updaterId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id        String        @id @default(uuid())
+  data      Json?
+  type      ACTIVITY_TYPE
+  table     String
+  userId    String
+  user      User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+}
+
+model School {
+  id          String   @id @default(uuid())
+  name        String   @db.Text
+  address     String?  @db.Text
+  phone       String?  @db.Text
+  email       String?  @db.Text
+  website     String?  @db.Text
+  description String?  @db.Text
+  logo        String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Contact {
+  id          String         @id @default(uuid())
+  name        String?        @db.Text
+  isAnonymous Boolean        @default(false)
+  status      CONTACT_STATUS
+  email       String?        @db.Text
+  phone       String?        @db.Text
+  content     String         @db.Text
+  createdAt   DateTime       @default(now())
+}
+
+enum CONTACT_STATUS {
+  PENDING
+  DONE
+}
+
+enum BOOK_LANGUAGE {
+  ENGLISH
+  VIETNAM
+  FRANCE
+}
+
+enum TRANSACTION_TYPE {
+  EXPORT_CANNEL
+  EXPORT_LOST
+}
+
+enum DOCUMENT_STATUS {
+  AVAILABLE
+  BORROWING
+  LOST
+  CANCEL
+}
+
+enum BORROW_REQUEST_STATUS {
+  PENDING
+  UNAPPROVED
+  APPROVED
+}
+
+enum ACTIVITY_TYPE {
+  CREATE
+  UPDATE
+  DELETE
+}
